@@ -1,30 +1,37 @@
-#!/usr/bin/python3
-"""Module that factorizes as many numbers as possible
-into a product of two smaller numbers."""
-from sys import argv
+#!/usr/bin/env python3
+import sys
+import subprocess
+import time
 
-def factorize(value):
-    """Print a simple decomposition of an integer > 1"""
-    i = 2
+def check_factor(args):
+    if len(args) != 3:
+        num2 = 1
+        for a in args[2:]:
+            num2 *= int(a)
+    else:
+        num2 = int(args[2])
 
-    if value < 2:
-        return
-    print("{:.0f}={:.0f}*{:.0f}".format(value, value / i, i))
+    num1 = int(args[1])
+    num = args[0].replace(':', '=')
 
-if len(argv) != 2:
-    print("Usage: {} <file>".format(argv[0]))
-    exit(1)
+    if num2 > num1:
+        num1, num2 = num2, num1
 
-try:
-    with open(argv[1]) as file:
-        line = file.readline()
+    print(f"{num}{num1}*{num2}")
 
-        while line != "":
-            value = int(line.strip())
-            factorize(value)
-            line = file.readline()
+def timeout_command(file_path):
+    with open(file_path, 'r') as file:
+        for line in file:
+            result = subprocess.run(['factor', line.strip()], capture_output=True, text=True)
+            check_factor(result.stdout.split()[1:])
 
-except FileNotFoundError:
-    print("Error: File not found")
-except Exception as e:
-    print("An error occurred:", e)
+if len(sys.argv) != 2:
+    print('Usage: factors.py <file>')
+    sys.exit(1)
+
+start_time = time.time()
+timeout_command(sys.argv[1])
+end_time = time.time()
+runtime = end_time - start_time
+
+print(f"Total runtime: {runtime:.3f} seconds")
