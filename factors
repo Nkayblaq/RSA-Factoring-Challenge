@@ -1,46 +1,30 @@
-#!/usr/bin/env bash
+#!/usr/bin/python3
+"""Module that factorizes as many numbers as possible
+into a product of two smaller numbers."""
+from sys import argv
 
-check_factor()
-{
-    if [ $# -ne 3 ];
-    then
-        args=("$@")
-        count=0
-        num2=1
-        for a in ${args[*]};
-        do
-            if [ $count -gt 1 ];
-            then
-                num2=$(echo $a*$num2 | bc)
-            fi
-            count=$((count + 1))
-        done
-    else
-        num2=$3
-    fi
+def factorize(value):
+    """Print a simple decomposition of an integer > 1"""
+    i = 2
 
-    num1=$2
-    num=$(echo "$1" | tr ':' '=')
+    if value < 2:
+        return
+    print("{:.0f}={:.0f}*{:.0f}".format(value, value / i, i))
 
-    result=$(echo "if($num2 > $num1) 1 else 0" | bc)
-    if ((result == 1)); then
-        numcp=$num1
-        num1=$num2
-        num2=$numcp
-    fi
+if len(argv) != 2:
+    print("Usage: {} <file>".format(argv[0]))
+    exit(1)
 
-    echo "$num$num1*$num2"
-}
+try:
+    with open(argv[1]) as file:
+        line = file.readline()
 
-if [ $# -ne 1 ]
-then
-    echo 'Usage: factors <file>'
-    exit 1
-else
-    while read i
-    do
-        result=$(factor "$i" | sed 's/.*: //')
-        check_factor $result
-    done < "$1"
-fi
+        while line != "":
+            value = int(line.strip())
+            factorize(value)
+            line = file.readline()
 
+except FileNotFoundError:
+    print("Error: File not found")
+except Exception as e:
+    print("An error occurred:", e)
