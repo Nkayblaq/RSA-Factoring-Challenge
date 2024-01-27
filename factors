@@ -2,6 +2,12 @@
 FILE=$1
 while read NUMBERS;
 do
-	factors=($(factor $NUMBERS))
-	echo "$NUMBERS=$(($NUMBERS/${factors[1]}))*${factors[1]}"
+        factors=$(timeout 5 factor $NUMBERS)
+
+        if [ $? -eq 124 ]; then
+            echo "Timeout occurred while factorizing $NUMBERS"
+        else
+            factors=($factors)
+            echo "$NUMBERS=${factors[1]}*$(($NUMBERS/${factors[1]}))"
+        fi
 done < $FILE
